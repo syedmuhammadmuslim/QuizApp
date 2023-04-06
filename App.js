@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import {StyleSheet, Text, View, Button, Image, Alert} from 'react-native';
 import {questions} from './questions';
 
@@ -15,10 +15,23 @@ const colors = [
   '#F2E9E4',
 ]; // Array of colors for each question
 
+function shuffleArray(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
 export default function App() {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
+
+  useEffect(() => {
+    resetGame();
+  }, []);
 
   const randomColorIndex = () => {
     const rand = Math.floor(Math.random() * colors.length);
@@ -26,20 +39,25 @@ export default function App() {
   };
 
   const handleAnswer = choice => {
-    if (choice === questions[currentQuestion].answer) {
+    if (choice === shuffledQuestions[currentQuestion].answer) {
       setScore(score + 1);
     }
     nextQuestion();
   };
 
   const resetGame = () => {
+    const newShuffledQuestions = shuffleArray([...questions]);
+    newShuffledQuestions.forEach(
+      question => (question.options = shuffleArray([...question.options])),
+    );
+    setShuffledQuestions(newShuffledQuestions);
     setCurrentQuestion(0);
     setScore(0);
     setShowScore(false);
   };
 
   const nextQuestion = () => {
-    if (currentQuestion === questions.length - 1) {
+    if (currentQuestion === shuffledQuestions.length - 1) {
       setShowScore(true);
     } else {
       setCurrentQuestion(currentQuestion + 1);
@@ -49,7 +67,7 @@ export default function App() {
   const renderQuestion = () => (
     <View style={styles.questionContainer}>
       <Text style={styles.questionText}>
-        {questions[currentQuestion].question}
+        {shuffledQuestions[currentQuestion].question}
       </Text>
     </View>
   );
@@ -57,7 +75,7 @@ export default function App() {
   const renderOptions = () => (
     <>
       <View style={styles.optionsContainer}>
-        {questions[currentQuestion].options.map((choice, index) => (
+        {shuffledQuestions[currentQuestion].options.map((choice, index) => (
           <View style={styles.buttonContainer} key={index}>
             <Button title={choice} onPress={() => handleAnswer(choice)} />
           </View>
@@ -77,7 +95,7 @@ export default function App() {
   const renderScore = () => (
     <View style={styles.scoreContainer}>
       <Text style={styles.scoreText}>
-        You scored {score} out of {questions.length}
+        You scored {score} out of {shuffledQuestions.length}
       </Text>
       <View style={styles.buttonContainer}>
         <Button
@@ -91,7 +109,7 @@ export default function App() {
   );
 
   const showCurrentScore = () => {
-    alert(`Your current score is ${score}/${questions.length}`);
+    alert(`Your current score is ${score}/${shuffledQuestions.length}`);
   };
 
   const finishGame = () => {
@@ -107,8 +125,14 @@ export default function App() {
           source={require('./assets/quiz-image.jpg')}
         />
       </View>
-      {showScore ? renderScore() : renderQuestion()}
-      {showScore ? null : renderOptions()}
+      {shuffledQuestions.length ? (
+        <>
+          {showScore ? renderScore() : renderQuestion()}
+          {showScore ? null : renderOptions()}
+        </>
+      ) : (
+        <Text>Loading...</Text>
+      )}
       <View style={styles.buttonContainer}>
         <Button
           title="Show Current Score"
