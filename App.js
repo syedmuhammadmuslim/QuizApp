@@ -1,5 +1,15 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, Pressable, Image, Alert} from 'react-native';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Pressable,
+  Image,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import {questions} from './questions';
 
 const colors = [
@@ -95,7 +105,7 @@ export default function App() {
   const renderScore = () => (
     <View style={styles.scoreContainer}>
       <Text style={styles.scoreText}>
-        You scored {score} out of {shuffledQuestions.length}
+        You scored {score} out of {currentQuestion}
       </Text>
       <View style={styles.buttonContainer}>
         <CustomPressable
@@ -106,10 +116,6 @@ export default function App() {
       </View>
     </View>
   );
-
-  const showCurrentScore = () => {
-    alert(`Your current score is ${score}/${currentQuestion + 1}`);
-  };
 
   const finishGame = () => {
     setShowScore(true);
@@ -127,37 +133,66 @@ export default function App() {
   );
 
   return (
-    <View
-      style={[styles.container, {backgroundColor: colors[randomColorIndex()]}]}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Quiz Game</Text>
-      </View>
-      <View style={styles.imageContainer}>
-        <Image
-          style={styles.image}
-          source={require('./assets/quiz-image.jpg')}
-        />
-      </View>
-      {shuffledQuestions.length ? (
-        <>
-          {showScore ? renderScore() : renderQuestion()}
-          {showScore ? null : renderOptions()}
-        </>
-      ) : (
-        <Text>Loading...</Text>
-      )}
-      <View style={styles.buttonContainer}>
-        <CustomPressable
-          title="Show Current Score"
-          onPress={showCurrentScore}
-          bgColor="#28A745"
-        />
-      </View>
-    </View>
+    <SafeAreaView style={styles.safeAreaContainer}>
+      <ScrollView
+        overScrollMode="always"
+        contentContainerStyle={styles.scrollContentContainer}>
+        <View
+          style={[
+            styles.container,
+            {backgroundColor: colors[randomColorIndex()]},
+          ]}>
+          <View style={styles.header}>
+            <Text style={styles.headerText}>Get Quizzical</Text>
+          </View>
+          <View style={styles.imageContainer}>
+            <Image
+              style={styles.image}
+              source={require('./assets/neonQuiz.jpg')}
+            />
+          </View>
+          {shuffledQuestions.length ? (
+            <>
+              {!showScore && (
+                <View style={styles.scoreDisplay}>
+                  <Text style={styles.scoreDisplayText}>
+                    Current Score: {score}/{currentQuestion}
+                  </Text>
+                </View>
+              )}
+              {showScore ? renderScore() : renderQuestion()}
+              {showScore ? null : renderOptions()}
+            </>
+          ) : (
+            <Text>Loading...</Text>
+          )}
+          <View style={styles.creditContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                Linking.openURL(
+                  'https://www.freepik.com/free-vector/quiz-neon-sign_4553888.htm#query=quiz%20neon&position=0&from_view=search&track=ais',
+                );
+              }}>
+              <Text style={styles.creditText}>
+                Image by katemangostar on Freepik
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeAreaContainer: {
+    flex: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
+    flexShrink: 1,
+    justifyContent: 'space-between',
+  },
   container: {
     flex: 1,
     backgroundColor: '#FFF',
@@ -180,7 +215,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: 200,
+    height: 150,
     borderRadius: 10,
     borderWidth: 2,
   },
@@ -231,5 +266,27 @@ const styles = StyleSheet.create({
   scoreText: {
     fontSize: 24,
     marginBottom: '2%',
+  },
+  scoreDisplay: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: '2%',
+    marginTop: '2%',
+  },
+  scoreDisplayText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  creditContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 10,
+  },
+  creditText: {
+    fontSize: 8,
+    color: '#333',
   },
 });
