@@ -89,6 +89,14 @@ export default function App() {
           color="#DC3545"
         />
       </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Show Current Score"
+          onPress={showCurrentScore}
+          textStyle={styles.buttonText}
+          color="#28A745"
+        />
+      </View>
     </>
   );
 
@@ -109,7 +117,7 @@ export default function App() {
   );
 
   const showCurrentScore = () => {
-    alert(`Your current score is ${score}/${shuffledQuestions.length}`);
+    alert(`Your current score is ${score}/${currentQuestion}`);
   };
 
   const finishGame = () => {
@@ -133,14 +141,6 @@ export default function App() {
       ) : (
         <Text>Loading...</Text>
       )}
-      <View style={styles.buttonContainer}>
-        <Button
-          title="Show Current Score"
-          onPress={showCurrentScore}
-          textStyle={styles.buttonText}
-          color="#28A745"
-        />
-      </View>
     </View>
   );
 }
