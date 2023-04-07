@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, View, Pressable, Image, Alert} from 'react-native';
+import {StyleSheet, Text, View, Button, Image, Alert} from 'react-native';
 import {questions} from './questions';
 
 const colors = [
@@ -20,19 +20,17 @@ function shuffleArray(array) {
     const j = Math.floor(Math.random() * (i + 1));
     [array[i], array[j]] = [array[j], array[i]];
   }
+  return array;
 }
 
 export default function App() {
-  const [shuffledQuestions, setShuffledQuestions] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [score, setScore] = useState(0);
   const [showScore, setShowScore] = useState(false);
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
 
   useEffect(() => {
-    const newQuestions = [...questions];
-    newQuestions.forEach(q => shuffleArray(q.options));
-    shuffleArray(newQuestions);
-    setShuffledQuestions(newQuestions);
+    resetGame();
   }, []);
 
   const randomColorIndex = () => {
@@ -48,6 +46,11 @@ export default function App() {
   };
 
   const resetGame = () => {
+    const newShuffledQuestions = shuffleArray([...questions]);
+    newShuffledQuestions.forEach(
+      question => (question.options = shuffleArray([...question.options])),
+    );
+    setShuffledQuestions(newShuffledQuestions);
     setCurrentQuestion(0);
     setScore(0);
     setShowScore(false);
@@ -74,19 +77,24 @@ export default function App() {
       <View style={styles.optionsContainer}>
         {shuffledQuestions[currentQuestion].options.map((choice, index) => (
           <View style={styles.buttonContainer} key={index}>
-            <CustomPressable
-              title={choice}
-              onPress={() => handleAnswer(choice)}
-              bgColor="#0275d8"
-            />
+            <Button title={choice} onPress={() => handleAnswer(choice)} />
           </View>
         ))}
       </View>
       <View style={styles.buttonContainer}>
-        <CustomPressable
+        <Button
           title="Finish Game"
           onPress={finishGame}
-          bgColor="#DC3545"
+          textStyle={styles.buttonText}
+          color="#DC3545"
+        />
+      </View>
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Show Current Score"
+          onPress={showCurrentScore}
+          textStyle={styles.buttonText}
+          color="#28A745"
         />
       </View>
     </>
@@ -98,33 +106,23 @@ export default function App() {
         You scored {score} out of {shuffledQuestions.length}
       </Text>
       <View style={styles.buttonContainer}>
-        <CustomPressable
+        <Button
           title="Play Again"
           onPress={resetGame}
-          bgColor="#007bff"
+          textStyle={styles.buttonText}
+          color="#007bff"
         />
       </View>
     </View>
   );
 
   const showCurrentScore = () => {
-    alert(`Your current score is ${score}/${currentQuestion + 1}`);
+    alert(`Your current score is ${score}/${currentQuestion}`);
   };
 
   const finishGame = () => {
     setShowScore(true);
   };
-
-  const CustomPressable = ({title, onPress, bgColor}) => (
-    <Pressable
-      style={({pressed}) => [
-        styles.pressable,
-        {backgroundColor: pressed ? '#9ac8f8' : bgColor},
-      ]}
-      onPress={onPress}>
-      <Text style={styles.buttonText}>{title}</Text>
-    </Pressable>
-  );
 
   return (
     <View
@@ -146,13 +144,6 @@ export default function App() {
       ) : (
         <Text>Loading...</Text>
       )}
-      <View style={styles.buttonContainer}>
-        <CustomPressable
-          title="Show Current Score"
-          onPress={showCurrentScore}
-          bgColor="#28A745"
-        />
-      </View>
     </View>
   );
 }
@@ -161,12 +152,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#FFF',
-    padding: '2%',
+    padding: 10,
   },
   header: {
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '2%',
+    padding: 10,
   },
   headerText: {
     fontSize: 24,
@@ -175,8 +166,8 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     alignItems: 'center',
-    marginTop: '2%',
-    marginBottom: '2%',
+    marginTop: 10,
+    marginBottom: 20,
   },
   image: {
     width: '100%',
@@ -187,8 +178,8 @@ const styles = StyleSheet.create({
   questionContainer: {
     borderWidth: 2,
     borderColor: '#ccc',
-    padding: '2%',
-    marginBottom: '2%',
+    padding: 10,
+    marginBottom: 10,
     borderRadius: 10,
   },
   questionText: {
@@ -199,37 +190,38 @@ const styles = StyleSheet.create({
   optionsContainer: {
     borderWidth: 2,
     borderColor: '#ccc',
-    padding: '2%',
+    padding: 10,
     borderRadius: 10,
-    marginTop: '2%',
+    marginTop: 10,
     backgroundColor: '#f8f9fa',
   },
   buttonContainer: {
-    marginVertical: '2%',
-    margin: '2%',
-  },
-  pressable: {
+    marginVertical: 10,
+    backgroundColor: '#0275d8',
     borderRadius: 10,
-    paddingVertical: '2%',
-    paddingHorizontal: '2%',
-    alignItems: 'center',
-    justifyContent: 'center',
+    shadowColor: '#0275d8',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
     elevation: 5,
-    marginBottom: '2%',
+    margin: 5,
   },
   buttonText: {
     color: '#FFF',
     fontSize: 18,
     fontWeight: 'bold',
     textAlign: 'center',
-    paddingVertical: '2%',
+    paddingVertical: 10,
   },
   scoreContainer: {
     alignItems: 'center',
-    marginTop: '2%',
+    marginTop: 20,
   },
   scoreText: {
     fontSize: 24,
-    marginBottom: '2%',
+    marginBottom: 20,
   },
 });
